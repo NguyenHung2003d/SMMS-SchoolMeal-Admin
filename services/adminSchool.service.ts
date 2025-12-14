@@ -7,33 +7,33 @@ import {
 
 export const adminSchoolService = {
   getAll: async (): Promise<SchoolDTO[]> => {
-    const res = await axiosInstance.get("/SchoolsControllerA");
+    const res = await axiosInstance.get("/api/SchoolsControllerA");
     return res.data;
   },
 
   getById: async (id: string): Promise<SchoolDTO | undefined> => {
-    const res = await axiosInstance.get(`/SchoolsControllerA/${id}`);
+    const res = await axiosInstance.get(`/api/SchoolsControllerA/${id}`);
     return res.data;
   },
 
   create: async (dto: CreateSchoolDto): Promise<{ id: string }> => {
-    const res = await axiosInstance.post("/SchoolsControllerA", dto);
+    const res = await axiosInstance.post("/api/SchoolsControllerA", dto);
     return res.data;
   },
 
   update: async (id: string, dto: UpdateSchoolDto): Promise<void> => {
-    const res = await axiosInstance.put(`/SchoolsControllerA/${id}`, dto);
+    const res = await axiosInstance.put(`/api/SchoolsControllerA/${id}`, dto);
     return res.data;
   },
 
   delete: async (id: string): Promise<void> => {
-    const res = await axiosInstance.delete(`/SchoolsControllerA/${id}`);
+    const res = await axiosInstance.delete(`/api/SchoolsControllerA/${id}`);
     return res.data;
   },
 
   updateManagerStatus: async (schoolId: string, isActive: boolean) => {
     const response = await axiosInstance.put(
-      `/SchoolsControllerA/manager-status?schoolId=${schoolId}`,
+      `/api/SchoolsControllerA/manager-status?schoolId=${schoolId}`,
       isActive,
       { headers: { "Content-Type": "application/json" } }
     );
