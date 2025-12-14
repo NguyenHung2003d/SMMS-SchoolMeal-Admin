@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +10,13 @@ import { LoginFormData } from "@/types/auth";
 import { Eye, EyeOff, Lock, Mail, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login, isLoginLoading } = useAuth({ enabled: false });
+  const router = useRouter();
+  const { login, isLoginLoading, user, isLoading, isAuthenticated } = useAuth({
+    enabled: true,
+  });
   const {
     register,
     handleSubmit,
@@ -21,6 +25,13 @@ export default function LoginPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === "Admin") router.push("/dashboard");
+      else router.push("/");
+    }
+  }, [isAuthenticated, user, router]);
 
   const onLoginSubmit = (data: LoginFormData) => {
     login(data, rememberMe);

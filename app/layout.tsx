@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import QueryProvider from "./providers";
-import AdminLayout from "../components/layouts/AdminLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,10 +20,8 @@ export default function RootLayout({
     <html lang="vi">
       <body className={inter.className}>
         <QueryProvider>
-          <AdminLayout>
-             {children}
-          </AdminLayout>
-          <Toaster position="top-right" />
+           {children}
+           <Toaster position="top-right" />
         </QueryProvider>
       </body>
     </html>

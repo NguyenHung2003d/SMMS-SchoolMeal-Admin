@@ -167,11 +167,7 @@ axiosInstance.interceptors.response.use(
 
         const path = window.location.pathname;
 
-        if (
-          !path.startsWith("/login") &&
-          !path.startsWith("/register") &&
-          !path.startsWith("/forgot-password")
-        ) {
+        if (!window.location.pathname.startsWith("/login")) {
           window.location.href = "/login";
         }
       }
