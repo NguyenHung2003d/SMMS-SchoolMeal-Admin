@@ -155,7 +155,7 @@ axiosInstance.interceptors.response.use(
 
     try {
       await axios.post(
-        "https://outragedly-guidebookish-mitzie.ngrok-free.dev/api/Auth/refresh-token",
+        "https://smms-school-meal-admin.vercel.app/api/Auth/refresh-token",
         {},
         {
           withCredentials: true,
