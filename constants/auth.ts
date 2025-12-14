@@ -4,5 +4,5 @@ export const ROLES = {
 
 export const PATHS = {
   LOGIN: "/login",
-  ADMIN_DASHBOARD: "/admin/dashboard",
+  ADMIN_DASHBOARD: "/dashboard",
 };
