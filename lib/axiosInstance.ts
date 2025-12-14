@@ -154,13 +154,7 @@ axiosInstance.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      await axios.post(
-        "https://smms-school-meal-admin.vercel.app/api/Auth/refresh-token",
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+      await axiosInstance.post("/api/Auth/refresh-token");
 
       processQueue(null);
 
