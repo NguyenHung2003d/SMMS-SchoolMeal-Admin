@@ -11,13 +11,13 @@ import {
   UpdateSchoolDto,
 } from "@/types/admin-school";
 
-import SchoolFormModal from "@/components/schools/SchoolFormModal";
 import DeleteSchoolModal from "@/components/schools/DeleteSchoolModal";
 import { adminSchoolRevenueService } from "@/services/adminRevenue.service";
 import SchoolCard from "@/components/schools/SchoolCard";
 import SchoolFilters from "@/components/schools/SchoolFilters";
 import { adminAiMenuService } from "@/services/adminAiMenu.service";
 import { cn } from "@/lib/utils";
+import SchoolFormModal from "@/components/schools/SchoolFormModal";
 
 export default function SchoolManagementPage() {
   const [schools, setSchools] = useState<SchoolDTO[]>([]);
@@ -47,6 +47,30 @@ export default function SchoolManagementPage() {
       toast.error("Không thể tải danh sách trường học");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleManagerStatusToggle = async (
+    schoolId: string,
+    currentStatus: boolean
+  ) => {
+    try {
+      const newStatus = !currentStatus;
+
+      await adminSchoolService.updateManagerStatus(schoolId, newStatus);
+
+      setSchools((prev) =>
+        prev.map((s) =>
+          s.schoolId === schoolId ? { ...s, managerIsActive: newStatus } : s
+        )
+      );
+
+      toast.success(
+        `Đã ${newStatus ? "kích hoạt" : "khóa"} tài khoản Manager thành công`
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi cập nhật trạng thái Manager");
     }
   };
 
@@ -120,6 +144,13 @@ export default function SchoolManagementPage() {
           schoolData as UpdateSchoolDto
         );
         newSchoolId = editingSchool.schoolId;
+        const formData = schoolData as any;
+        if (formData.managerIsActive !== editingSchool.managerIsActive) {
+          await adminSchoolService.updateManagerStatus(
+            editingSchool.schoolId,
+            formData.managerIsActive
+          );
+        }
         toast.success("Cập nhật trường học thành công");
       } else {
         const response = await adminSchoolService.create(
@@ -148,12 +179,27 @@ export default function SchoolManagementPage() {
       loadSchools();
       checkAiStatus();
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại."
-      );
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Đã xảy ra lỗi không xác định.";
+
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleContractAdd = async (
+    schoolId: string,
+    data: any,
+    file?: File | null
+  ) => {
+    await adminSchoolRevenueService.create({
+      ...data,
+      schoolId: schoolId,
+      contractFile: file,
+    });
   };
 
   const handleContractUpdate = async (
@@ -173,8 +219,10 @@ export default function SchoolManagementPage() {
     try {
       setIsDeleting(true);
       await adminSchoolService.delete(schoolToDeleteId);
-      toast.success("Đã xóa (vô hiệu hóa) trường học");
-      loadSchools();
+
+      setSchools((prev) => prev.filter((s) => s.schoolId !== schoolToDeleteId));
+
+      toast.success("Đã xóa trường học thành công");
       setIsDeleteModalOpen(false);
       checkAiStatus();
     } catch (error) {
@@ -284,6 +332,7 @@ export default function SchoolManagementPage() {
                 onToggleStatus={handleToggleStatus}
                 onOpenEditModal={openEditModal}
                 onOpenDeleteModal={openDeleteModal}
+                onToggleManagerStatus={handleManagerStatusToggle}
               />
             ))}
           </div>
@@ -324,6 +373,7 @@ export default function SchoolManagementPage() {
         isSubmitting={isSubmitting}
         onContractUpdate={handleContractUpdate}
         onContractDelete={handleContractDelete}
+        onContractAdd={handleContractAdd}
       />
       <DeleteSchoolModal
         isOpen={isDeleteModalOpen}

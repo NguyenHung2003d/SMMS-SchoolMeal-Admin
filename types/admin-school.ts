@@ -7,6 +7,7 @@ export interface SchoolDTO {
   isActive: boolean;
   createdAt: string;
   studentCount: number;
+  managerIsActive: boolean
 }
 
 export interface CreateSchoolDto {

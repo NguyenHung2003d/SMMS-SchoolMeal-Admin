@@ -89,7 +89,7 @@
 // Dưới ni là của dev local
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-const BASE_URL = '';
+const BASE_URL = 'http://localhost:5000';
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
