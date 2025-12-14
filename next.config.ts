@@ -5,7 +5,8 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://outragedly-guidebookish-mitzie.ngrok-free.dev/api/:path*",
+        destination:
+          "https://outragedly-guidebookish-mitzie.ngrok-free.dev/api/:path*",
       },
     ];
   },
