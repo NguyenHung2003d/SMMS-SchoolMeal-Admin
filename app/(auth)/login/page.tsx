@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useAuth } from "@/hooks/auth/useAuth";
 import { useLoginForm } from "@/schema/LoginForm";
 import { LoginFormData } from "@/types/auth";
 import { Eye, EyeOff, Lock, Mail, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const { login, isLoginLoading } = useAuth({ enabled: false });

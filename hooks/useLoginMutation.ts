@@ -28,6 +28,11 @@ export const useLoginMutation = () => {
               path: PATHS.ADMIN_DASHBOARD,
               message: "Xin chào Admin! Đăng nhập hệ thống thành công.",
             };
+          default:
+            return {
+              path: "/",
+              message: "Đăng nhập thành công.",
+            };
         }
       })();
 

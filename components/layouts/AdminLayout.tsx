@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/auth/useAuth";
 import { getInitials } from "@/helpers";
 import Loader from "@/components/Loader";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AdminLayout({
   children,

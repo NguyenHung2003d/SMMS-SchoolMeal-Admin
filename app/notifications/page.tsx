@@ -3,7 +3,7 @@ import CreateNotificationModal from "@/components/notifications/CreateNotificati
 import NotificationDetailModal from "@/components/notifications/NotificationDetailModal";
 import NotificationHeader from "@/components/notifications/NotificationHeader";
 import NotificationList from "@/components/notifications/NotificationList";
-import { useAuth } from "@/hooks/auth/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { adminNotificationService } from "@/services/adminNotification.service";
 import {
   CreateNotificationDto,
