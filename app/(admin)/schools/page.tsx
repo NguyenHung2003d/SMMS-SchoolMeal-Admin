@@ -193,7 +193,7 @@ export default function SchoolManagementPage() {
   const handleContractAdd = async (
     schoolId: string,
     data: any,
-    file?: File | null
+    file: File | null
   ) => {
     await adminSchoolRevenueService.create({
       ...data,
