@@ -1,10 +1,12 @@
 "use client";
+
 import CreateNotificationModal from "@/components/notifications/CreateNotificationModal";
 import NotificationDetailModal from "@/components/notifications/NotificationDetailModal";
 import NotificationHeader from "@/components/notifications/NotificationHeader";
 import NotificationList from "@/components/notifications/NotificationList";
 import { useAuth } from "@/hooks/useAuth";
 import { adminNotificationService } from "@/services/adminNotification.service";
+import { axiosInstance } from "@/lib/axiosInstance";
 import {
   CreateNotificationDto,
   NotificationDetailDto,
@@ -14,6 +16,7 @@ import {
   HubConnection,
   HubConnectionBuilder,
   LogLevel,
+  HttpTransportType, // Thêm cái này
 } from "@microsoft/signalr";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -37,51 +40,68 @@ export default function NotificationManagement() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const HUB_URL =
-      process.env.NEXT_PUBLIC_HUB_URL ||
-      "http://localhost:5000/hubs/notifications";
-    const newConnection = new HubConnectionBuilder()
-      .withUrl(HUB_URL, {
-        withCredentials: true,
-        skipNegotiation: false
-      })
-      .withAutomaticReconnect()
-      .configureLogging(LogLevel.Information)
-      .build();
-    setConnection(newConnection);
-  }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (connection) {
-      connection
-        .start()
-        .then(() => {
-          console.log("Connected to Notification Hub");
+    let newConnection: HubConnection | null = null;
 
-          connection.on(
-            "ReceiveNotification",
-            (newNotification: NotificationDto) => {
-              setNotifications((prev) => [newNotification, ...prev]);
-              toast("Có thông báo mới vừa được tạo!", { icon: "🔔" });
-            }
-          );
+    const startSignalR = async () => {
+      try {
+        const res = await axiosInstance.get("/Auth/connection-token", {
+          headers: { "ngrok-skip-browser-warning": "true" },
+        });
 
-          connection.on(
-            "NotificationDeleted",
-            ({ notificationId }: { notificationId: number }) => {
-              setNotifications((prev) =>
-                prev.filter((n) => n.notificationId !== notificationId)
-              );
-            }
-          );
-        })
-        .catch((err) => console.error("SignalR Connection Error: ", err));
-    }
+        const accessToken = res.data.token;
+
+        if (!accessToken) {
+          console.error("Không lấy được token kết nối SignalR");
+          return;
+        }
+        const HUB_URL =
+          "https://outragedly-guidebookish-mitzie.ngrok-free.dev/hubs/notifications";
+
+        newConnection = new HubConnectionBuilder()
+          .withUrl(HUB_URL, {
+            accessTokenFactory: () => accessToken,
+            skipNegotiation: true,
+            transport: HttpTransportType.WebSockets,
+          })
+          .withAutomaticReconnect()
+          .configureLogging(LogLevel.Information)
+          .build();
+
+        await newConnection.start();
+        console.log("🟢 Connected to Notification Hub via Ngrok");
+
+        newConnection.on(
+          "ReceiveNotification",
+          (newNotification: NotificationDto) => {
+            setNotifications((prev) => [newNotification, ...prev]);
+            toast("Có thông báo mới vừa được tạo!", { icon: "🔔" });
+          }
+        );
+
+        newConnection.on(
+          "NotificationDeleted",
+          ({ notificationId }: { notificationId: number }) => {
+            setNotifications((prev) =>
+              prev.filter((n) => n.notificationId !== notificationId)
+            );
+          }
+        );
+
+        setConnection(newConnection);
+      } catch (err) {
+        console.error("🔴 SignalR Connection Error: ", err);
+      }
+    };
+
+    startSignalR();
 
     return () => {
-      connection?.stop();
+      if (newConnection) {
+        newConnection.stop();
+      }
     };
-  }, [connection]);
+  }, [isAuthenticated]);
 
   const loadNotifications = async () => {
     try {
