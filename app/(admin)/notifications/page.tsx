@@ -43,6 +43,7 @@ export default function NotificationManagement() {
     const newConnection = new HubConnectionBuilder()
       .withUrl(HUB_URL, {
         withCredentials: true,
+        skipNegotiation: false
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
