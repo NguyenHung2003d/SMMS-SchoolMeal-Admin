@@ -8,26 +8,26 @@ import {
 
 export const adminReportService = {
   getAllUserReports: async (): Promise<UserReportDto[]> => {
-    const res = await axiosInstance.get("/api/Report/users");
+    const res = await axiosInstance.get("/Report/users");
     return res.data;
   },
 
   getUserReportsByFilter: async (
     filter: ReportFilterDto
   ): Promise<UserReportDto[]> => {
-    const res = await axiosInstance.post("/api/Report/users", filter);
+    const res = await axiosInstance.post("/Report/users", filter);
     return res.data;
   },
 
   getAllFinanceReports: async (): Promise<FinanceReportDto[]> => {
-    const res = await axiosInstance.get("/api/Report/Finance");
+    const res = await axiosInstance.get("/Report/Finance");
     return res.data;
   },
 
   getFinanceReportsByFilter: async (
     filter: FinanceReportFilterDto
   ): Promise<FinanceReportDto[]> => {
-    const res = await axiosInstance.post("/api/Report/Finance", filter);
+    const res = await axiosInstance.post("/Report/Finance", filter);
     return res.data;
   },
 };

@@ -18,7 +18,7 @@ export const adminSchoolRevenueService = {
       formData.append("contractFile", data.contractFile);
     }
 
-    const res = await axiosInstance.post("/api/SchoolContact", formData, {
+    const res = await axiosInstance.post("/SchoolContact", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -27,7 +27,7 @@ export const adminSchoolRevenueService = {
   },
 
   getBySchool: async (schoolId: string): Promise<SchoolRevenue[]> => {
-    const res = await axiosInstance.get(`/api/SchoolContact?schoolId=${schoolId}`);
+    const res = await axiosInstance.get(`/SchoolContact?schoolId=${schoolId}`);
     return res.data;
   },
 
@@ -61,7 +61,7 @@ export const adminSchoolRevenueService = {
   },
 
   delete: async (revenueId: number) => {
-    const res = await axiosInstance.delete(`/api/SchoolContact/${revenueId}`);
+    const res = await axiosInstance.delete(`/SchoolContact/${revenueId}`);
     return res.data;
   },
 };
