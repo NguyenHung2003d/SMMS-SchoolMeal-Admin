@@ -4,22 +4,24 @@ import CreateNotificationModal from "@/components/notifications/CreateNotificati
 import NotificationDetailModal from "@/components/notifications/NotificationDetailModal";
 import NotificationHeader from "@/components/notifications/NotificationHeader";
 import NotificationList from "@/components/notifications/NotificationList";
-import { useAuth } from "@/hooks/useAuth";
+
 import { adminNotificationService } from "@/services/adminNotification.service";
-import { axiosInstance } from "@/lib/axiosInstance";
+
 import {
   CreateNotificationDto,
   NotificationDetailDto,
 } from "@/types/admin-notification";
 import { NotificationDto } from "@/types/notification";
+
 import {
   HubConnection,
   HubConnectionBuilder,
   LogLevel,
-  HttpTransportType, // Thêm cái này
+  HttpTransportType,
+  HubConnectionState,
 } from "@microsoft/signalr";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 
 export default function NotificationManagement() {
@@ -36,60 +38,52 @@ export default function NotificationManagement() {
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   const [connection, setConnection] = useState<HubConnection | null>(null);
-  const { isAuthenticated } = useAuth();
+  const connectionRef = useRef<HubConnection | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    const HUB_URL = process.env.NEXT_PUBLIC_HUB_URL || "";
 
-    let newConnection: HubConnection | null = null;
+    const newConnection = new HubConnectionBuilder()
+      .withUrl(HUB_URL, {
+        withCredentials: true,
+        skipNegotiation: true,
+        transport: HttpTransportType.WebSockets,
+      })
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Information)
+      .build();
+
+    connectionRef.current = newConnection;
 
     const startSignalR = async () => {
       try {
-        const res = await axiosInstance.get("/Auth/connection-token", {
-          headers: { "ngrok-skip-browser-warning": "true" },
-        });
+        if (newConnection.state === HubConnectionState.Disconnected) {
+          await newConnection.start();
+          console.log("🟢 Connected to Notification Hub");
 
-        const accessToken = res.data.token;
+          setConnection(newConnection);
 
-        if (!accessToken) {
-          console.error("Không lấy được token kết nối SignalR");
+          newConnection.on(
+            "ReceiveNotification",
+            (newNotification: NotificationDto) => {
+              setNotifications((prev) => [newNotification, ...prev]);
+              toast("Có thông báo mới vừa được tạo!", { icon: "🔔" });
+            }
+          );
+
+          newConnection.on(
+            "NotificationDeleted",
+            ({ notificationId }: { notificationId: number }) => {
+              setNotifications((prev) =>
+                prev.filter((n) => n.notificationId !== notificationId)
+              );
+            }
+          );
+        }
+      } catch (err: any) {
+        if (err.message && err.message.includes("before stop() was called")) {
           return;
         }
-        const HUB_URL =
-          "https://outragedly-guidebookish-mitzie.ngrok-free.dev/hubs/notifications";
-
-        newConnection = new HubConnectionBuilder()
-          .withUrl(HUB_URL, {
-            accessTokenFactory: () => accessToken,
-            skipNegotiation: true,
-            transport: HttpTransportType.WebSockets,
-          })
-          .withAutomaticReconnect()
-          .configureLogging(LogLevel.Information)
-          .build();
-
-        await newConnection.start();
-        console.log("🟢 Connected to Notification Hub via Ngrok");
-
-        newConnection.on(
-          "ReceiveNotification",
-          (newNotification: NotificationDto) => {
-            setNotifications((prev) => [newNotification, ...prev]);
-            toast("Có thông báo mới vừa được tạo!", { icon: "🔔" });
-          }
-        );
-
-        newConnection.on(
-          "NotificationDeleted",
-          ({ notificationId }: { notificationId: number }) => {
-            setNotifications((prev) =>
-              prev.filter((n) => n.notificationId !== notificationId)
-            );
-          }
-        );
-
-        setConnection(newConnection);
-      } catch (err) {
         console.error("🔴 SignalR Connection Error: ", err);
       }
     };
@@ -97,11 +91,14 @@ export default function NotificationManagement() {
     startSignalR();
 
     return () => {
-      if (newConnection) {
-        newConnection.stop();
+      if (connectionRef.current) {
+        connectionRef.current.off("ReceiveNotification");
+        connectionRef.current.off("NotificationDeleted");
+
+        connectionRef.current.stop().catch(() => {});
       }
     };
-  }, [isAuthenticated]);
+  }, []);
 
   const loadNotifications = async () => {
     try {

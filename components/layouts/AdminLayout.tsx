@@ -6,7 +6,6 @@ import {
   Users,
   Bell,
   FileText,
-  Search,
   Menu,
   ChevronDown,
   User,
@@ -128,19 +127,7 @@ export default function AdminLayout({
           isSidebarOpen ? "ml-64" : "ml-20"
         } transition-all duration-300`}
       >
-        <header className="bg-white shadow-sm sticky top-0 z-10 p-4 flex justify-between items-center h-16">
-          <div className="relative max-w-md w-full">
-            <input
-              type="text"
-              placeholder="Tìm kiếm..."
-              className="pl-10 pr-4 py-2 border rounded-lg w-full focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-            />
-            <Search
-              className="absolute left-3 top-2.5 text-gray-400"
-              size={18}
-            />
-          </div>
-
+        <header className="bg-white shadow-sm sticky top-0 z-10 p-4 flex justify-end items-center h-16">
           <div className="relative">
             <button
               onClick={() => setIsAccountOpen(!isAccountOpen)}

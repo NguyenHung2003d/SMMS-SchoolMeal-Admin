@@ -4,10 +4,6 @@ import { PATHS, ROLES } from "./constants/auth";
 export function middleware(req: NextRequest) {
   const { pathname, searchParams } = req.nextUrl;
 
-  if (searchParams.has("_rsc")) {
-    return NextResponse.next();
-  }
-
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/login", req.url));
   }
